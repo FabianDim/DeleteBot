@@ -28,7 +28,7 @@ class MyClient(commands.Bot):
 handler = Logger.handler
 
 key = os.getenv('DISCORD_KEY')
-badWords = [str(os.getenv('BadWord1')),str(os.getenv('BadWord1')),str(os.getenv('BadWord1')),str(os.getenv('BadWord1'))]
+badWords = [str(os.getenv('BadWord1')),str(os.getenv('BadWord2')),str(os.getenv('BadWord3')),str(os.getenv('BadWord4'))]
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -52,11 +52,16 @@ async def findMessages(interaction: discord.Interaction, phrase: str, amount: in
     channel = interaction.channel
     messages = [message async for message in channel.history(limit=amount)]#creates an array of messages
     counter = sum(1 for message in messages if phrase in message.content) #counts messages with phrases.
+    
+    if badWords.__contains__(phrase): #would like to have used a pointer here to be able to reference the location of it so i dont have to change phrase
+        phrase = "REDACTED"
 
     await interaction.followup.send(f"This is how many messages with phrase {phrase} I found: {counter}")
 
-async def deleteMessages(deletelist: array):
-    await interaction.followup.send(f"yuh")
+    #deleteMessages(messages)
+
+#def deleteMessages(deletelist: array):
+    
 
 
 
