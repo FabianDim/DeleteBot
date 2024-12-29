@@ -39,14 +39,14 @@ GUILD_ID = discord.Object(id=320425715310788618)
 async def sayHello(interaction: discord.Interaction):
     await interaction.response.send_message("pang")
 
-@client.tree.command(name="delete_messages", description="Specify a phrase and how many messages you want to delete and I will delete that many messages", guild=GUILD_ID)
+@client.tree.command(name="delete_messages", description="Specify a phrase and how many messages you want to find and then specify whether you want them deleted", guild=GUILD_ID)
 async def findMessages(interaction: discord.Interaction, phrase: str, amount: int):
     await interaction.response.defer()  # Defer the response to avoid timeout
 
     counter = 0
 
-    if amount < 0 or amount >= 5000:
-        await interaction.followup.send(f"Please limit the search radius to 5000")#avoid to many messages finding
+    if amount < 0 or amount >= 1000:
+        await interaction.followup.send(f"Please limit the search radius to 5000")#avoid to many messages taking to long.
         return
 
     channel = interaction.channel
