@@ -33,8 +33,15 @@ intents.message_content = True
 client = MyClient(command_prefix="!", intents = intents)
 GUILD_ID = discord.Object(id=320425715310788618)
 
-@client.tree.command(name="hello", description="Say Hello!", guild=GUILD_ID)
+@client.tree.command(name="ping", description="If I am here I will say Pang!", guild=GUILD_ID) #developing / commands for the 
 async def sayHello(interaction: discord.Interaction):
-    await interaction.response.send_message("Hi there!")
+    await interaction.response.send_message("pang")
 
+@client.tree.command(name="delete_messages", description="Specify a phrase and how much you want to delete andI will delete that many messages", guild=GUILD_ID)
+async def deleteMessages(interaction: discord.Interaction, phrase: str, amount: int):
+    counter = 0
+    async for message in channel.history(limit=amount):
+        if(message.author == client.user):
+            counter+=1
+    await
 client.run(key, log_handler=handler)
