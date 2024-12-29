@@ -26,7 +26,9 @@ class MyClient(commands.Bot):
             return
 
 handler = Logger.handler
+
 key = os.getenv('DISCORD_KEY')
+badWords = [str(os.getenv('BadWord1')),str(os.getenv('BadWord1')),str(os.getenv('BadWord1')),str(os.getenv('BadWord1'))]
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -37,11 +39,25 @@ GUILD_ID = discord.Object(id=320425715310788618)
 async def sayHello(interaction: discord.Interaction):
     await interaction.response.send_message("pang")
 
-@client.tree.command(name="delete_messages", description="Specify a phrase and how much you want to delete andI will delete that many messages", guild=GUILD_ID)
-async def deleteMessages(interaction: discord.Interaction, phrase: str, amount: int):
+@client.tree.command(name="delete_messages", description="Specify a phrase and how many messages you want to delete and I will delete that many messages", guild=GUILD_ID)
+async def findMessages(interaction: discord.Interaction, phrase: str, amount: int):
+    await interaction.response.defer()  # Defer the response to avoid timeout
+
     counter = 0
-    async for message in channel.history(limit=amount):
-        if(message.author == client.user):
-            counter+=1
-    await
+
+    if amount < 0 or amount >= 5000:
+        await interaction.followup.send(f"Please limit the search radius to 5000")#avoid to many messages finding
+        return
+
+    channel = interaction.channel
+    messages = [message async for message in channel.history(limit=amount)]#creates an array of messages
+    counter = sum(1 for message in messages if phrase in message.content) #counts messages with phrases.
+
+    await interaction.followup.send(f"This is how many messages with phrase {phrase} I found: {counter}")
+
+async def deleteMessages(deletelist: array):
+    await interaction.followup.send(f"yuh")
+
+
+
 client.run(key, log_handler=handler)
