@@ -1,7 +1,8 @@
+import array
 from code import interact
 import discord
 from discord.ext import commands
-from discord import app_commands, guild
+from discord import DeletedReferencedMessage, app_commands, guild
 import sys
 import os
 from dotenv import load_dotenv
@@ -25,6 +26,22 @@ class MyClient(commands.Bot):
         if message.author == self.user:
             return
 
+
+
+class Buttons(discord.ui.View):
+    def __init__(self, messages, *, timeout=180):
+        super().__init__(timeout=timeout)
+        self.messages = messages
+
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.danger)
+    async def yes_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(content="Message Deleted!")
+        await deleteMessages(self.messages)
+    @discord.ui.button(label="No",style=discord.ButtonStyle.green)
+    async def no_button(self,interaction:discord.Interaction,button:discord.ui.Button):
+        await interaction.response.edit_message(content=f"Deletion Canceled!")
+
+
 handler = Logger.handler
 
 key = os.getenv('DISCORD_KEY')
@@ -39,30 +56,39 @@ GUILD_ID = discord.Object(id=320425715310788618)
 async def sayHello(interaction: discord.Interaction):
     await interaction.response.send_message("pang")
 
-@client.tree.command(name="delete_messages", description="Specify a phrase and how many messages you want to find and then specify whether you want them deleted", guild=GUILD_ID)
+@client.tree.command(name="delete_messages", description="Find and delete messages", guild=GUILD_ID)
 async def findMessages(interaction: discord.Interaction, phrase: str, amount: int):
     await interaction.response.defer()  # Defer the response to avoid timeout
 
     counter = 0
 
-    if amount < 0 or amount >= 1000:
-        await interaction.followup.send(f"Please limit the search radius to 5000")#avoid to many messages taking to long.
+    if amount < 0 or amount >= 5000:
+        await interaction.followup.send(f"Please limit the search radius from 0-5000")#avoid to many messages taking to long.
         return
-
     channel = interaction.channel
-    messages = [message async for message in channel.history(limit=amount)]#creates an array of messages
-    counter = sum(1 for message in messages if phrase in message.content) #counts messages with phrases.
-    
-    if badWords.__contains__(phrase): #would like to have used a pointer here to be able to reference the location of it so i dont have to change phrase
+    user_id = interaction.user.id
+    messages = []
+    async for message in channel.history(limit=amount):
+        if message.author.id == user_id and phrase in message.content:
+            messages.append(message)
+            counter += 1  # Count messages with phrases.
+     #counts messages with phrases.
+    if len(messages) == 0:
+        await interaction.followup.send(f"Please expand search radius")
+        return
+    prevphrase = phrase
+    if phrase in badWords: #would like to have used a pointer here to be able to reference the location of it so i dont have to change phrase
         phrase = "REDACTED"
 
-    await interaction.followup.send(f"This is how many messages with phrase {phrase} I found: {counter}")
+    await interaction.followup.send(f"This is how many messages with phrase '{phrase}' I found: {counter}", view=Buttons(messages))
 
-    #deleteMessages(messages)
+    phrase = prevphrase #return the phrase back to its original value to make sure we can use it later if needed
 
-#def deleteMessages(deletelist: array):
-    
 
+
+async def deleteMessages(deletelist: array):
+    for message in deletelist:
+        await message.delete()
 
 
 client.run(key, log_handler=handler)
