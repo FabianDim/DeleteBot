@@ -12,3 +12,5 @@ I also used this project to develop my Python skills, and I have wanted to devel
 - Further developed my to read, search and understand documentation and write my own comments regarding the code
 
 - Furthered my knowledge of Python syntax and features. (I missed C++ at some stages)
+
+Check the product out for yourself here: https://discord.com/oauth2/authorize?client_id=1322064164151234580&permissions=8&integration_type=0&scope=bot
