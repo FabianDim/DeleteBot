@@ -7,5 +7,7 @@ I also used this project to develop my Python skills, and I have wanted to devel
 
 <h2> Key Takeaways</h2>
 - I learned to optimise search algorithms in Python
+
 - Further developed my to read, search and understand documentation and write my own comments regarding the code
+
 - Furthered my knowledge of Python syntax and features. (I missed C++ at some stages)
