@@ -1,4 +1,5 @@
 import array
+from ast import Delete
 from code import interact
 import discord
 from discord.ext import commands
@@ -17,15 +18,13 @@ class MyClient(commands.Bot):
         print(f'Logged on as {self.user}!')
 
         try:
-            GUILD_ID = discord.Object(id=320425715310788618)
-            synced = await self.tree.sync(guild=GUILD_ID)
-            print(f'sync {len(synced)} commands to guild')
+            synced = await self.tree.sync()
+            print(f'sync {len(synced)} commands globally')
         except Exception as e:
             print(f'error syncing {e}')
     async def on_message(self, message):
         if message.author == self.user:
             return
-
 
 
 class Buttons(discord.ui.View):
@@ -35,55 +34,64 @@ class Buttons(discord.ui.View):
 
     @discord.ui.button(label="Yes", style=discord.ButtonStyle.danger)
     async def yes_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await interaction.response.edit_message(content="Message Deleted!")
+        await interaction.response.edit_message(content="Message Deleted!", view=None)
         await deleteMessages(self.messages)
-    @discord.ui.button(label="No",style=discord.ButtonStyle.green)
-    async def no_button(self,interaction:discord.Interaction,button:discord.ui.Button):
-        await interaction.response.edit_message(content=f"Deletion Canceled!")
+        button.disabled = True
+
+    @discord.ui.button(label="No", style=discord.ButtonStyle.success)
+    async def no_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(content="Deletion Canceled!", view=None)
 
 
 handler = Logger.handler
 
 key = os.getenv('DISCORD_KEY')
-badWords = [str(os.getenv('BadWord1')),str(os.getenv('BadWord2')),str(os.getenv('BadWord3')),str(os.getenv('BadWord4'))]
+badWords = [str(os.getenv('BadWord1')), str(os.getenv('BadWord2')), str(os.getenv('BadWord3')), str(os.getenv('BadWord4'))]
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = MyClient(command_prefix="!", intents = intents)
-GUILD_ID = discord.Object(id=320425715310788618)
+client = MyClient(command_prefix="!", intents=intents)
 
-@client.tree.command(name="ping", description="If I am here I will say Pang!", guild=GUILD_ID) #developing / commands for the 
+@client.tree.command(name="ping", description="If I am here I will say Pang!")  # developing / commands for the 
 async def sayHello(interaction: discord.Interaction):
     await interaction.response.send_message("pang")
 
-@client.tree.command(name="delete_messages", description="Find and delete messages", guild=GUILD_ID)
+@client.tree.command(name="delete_messages", description="Find and delete messages")
 async def findMessages(interaction: discord.Interaction, phrase: str, amount: int):
     await interaction.response.defer()  # Defer the response to avoid timeout
 
-    counter = 0
-
-    if amount < 0 or amount >= 5000:
-        await interaction.followup.send(f"Please limit the search radius from 0-5000")#avoid to many messages taking to long.
+    if amount < 0 or amount > 5000:
+        await interaction.followup.send(f"Please limit the search radius from 0-5000")  # Avoid too many messages taking too long.
         return
+
     channel = interaction.channel
     user_id = interaction.user.id
     messages = []
+    counter = 0
+
     async for message in channel.history(limit=amount):
         if message.author.id == user_id and phrase in message.content:
             messages.append(message)
             counter += 1  # Count messages with phrases.
-     #counts messages with phrases.
+
     if len(messages) == 0:
         await interaction.followup.send(f"Please expand search radius")
         return
+
     prevphrase = phrase
-    if phrase in badWords: #would like to have used a pointer here to be able to reference the location of it so i dont have to change phrase
+    if phrase in badWords:  # Would like to have used a pointer here to be able to reference the location of it so I don't have to change phrase
         phrase = "REDACTED"
 
-    await interaction.followup.send(f"This is how many messages with phrase '{phrase}' I found: {counter}", view=Buttons(messages))
+    await interaction.followup.send(f"This is how many messages with phrase '{phrase}' I found: {counter}. Do you want to delete them?", view=Buttons(messages))
 
-    phrase = prevphrase #return the phrase back to its original value to make sure we can use it later if needed
+    phrase = prevphrase  # Return the phrase back to its original value to make sure we can use it later if needed
 
+@client.tree.command(name="purge_messages", description="Delete as many messages as you want")
+async def purgeMessages(interaction: discord.Interaction, amount: int):
+    await interaction.response.defer()  # Defer the response to avoid timeout
+    messages = []
+    async for message in channel.history(limit=amount):
+        message.append(message)
 
 
 async def deleteMessages(deletelist: array):
