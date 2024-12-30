@@ -6,6 +6,7 @@ This bot is a solution to a problem I have had with Discord. I developed an easy
 I also used this project to develop my Python skills, and I have wanted to develop a bot for a while now.
 
 <h2> Key Takeaways</h2>
+
 - I learned to optimise search algorithms in Python
 
 - Further developed my to read, search and understand documentation and write my own comments regarding the code
